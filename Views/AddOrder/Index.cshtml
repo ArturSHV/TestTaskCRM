@@ -1,0 +1,40 @@
+﻿@{
+	ViewData["Title"] = "Добавить новый заказ";
+}
+
+@model AddOrderPageModel
+
+<section>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-md-12 col-sm-12">
+				<div class="section-title" style="text-align: center;">
+					
+					<h2 id="title" >Новый заказ</h2>
+					
+				</div>
+			</div>
+			<form action="AddOrder" method="post">
+				<input type="text" name="number" placeholder="Введите номер заказа" required/><br />
+				<select name="providerName">
+					@{
+						if (Model != null)
+						{
+							foreach(var item in Model.providers)
+							{
+								<option>@item</option>
+							}
+						}
+					}
+				</select><br />
+
+				<input type="submit" value="Добавить" class="btn btn-primary" />
+
+			</form>
+		</div>
+	</div>
+</section>
+
+
+

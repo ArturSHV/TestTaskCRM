@@ -1,0 +1,224 @@
+﻿@{
+	ViewData["Title"] = "Просмотр заказа";
+	string[] tableColumnHeader = new string[] { "", "ProviderId", "ProviderName", "OrderitemId", "OrderitemName", "Quantity", "Unit" };
+}
+
+@model ViewOrderPageModel
+
+<section>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-md-12 col-sm-12">
+				<div class="section-title" style="text-align: center;">
+					@{
+						string? text = null;
+						if (Model != null)
+						{
+							text = $"Заказ {Model.number} от {Model.date?.ToShortDateString()}";
+							<h2 id="titleEdit" class="display-none">Заказ <input type="text" id="numberHidden" value="@Model.number" required/> от <input type="text" id="dateHidden" value="@Model.date?.ToShortDateString()" required/></h2>
+							
+							<form action="DeleteOrder/@Model.orderId" method="post">
+							<input type="hidden" value="@Model.orderId"/>
+							<input type="submit" value="Удалить заказ" class="btn btn-primary" />
+							</form>
+						}
+						text = text ?? "Заказ";
+					}
+					<h2 id="title" >@text</h2>
+					
+				</div>
+			</div>
+			<p>@ViewBag.message</p>
+			@{
+				if (Model != null)
+				{
+					<div class="table">
+						<table class="table table-bordered table-hover table-striped" id="myTableId">
+							<thead>
+								<tr>
+									@{
+										foreach (string columnHead in tableColumnHeader)
+										{
+											<th>@columnHead</th>
+										}
+									}
+								</tr>
+
+								<form action="@Model.orderId" method="post">
+									<input type="submit" id="appFilter" value="Применить фильтр" class="btn btn-primary" />
+									<input type="button" id="clearFilter" value="Сбросить" class="btn btn-primary" onClick="document.location='/ViewOrder/@Model.orderId'" />
+								<tr id="filterForm">
+									
+									<th>
+
+									</th>
+
+									<th>
+											@{
+
+											<select name="providerId" multiple>
+													@foreach (var item in Model.dataForFilter.providerId)
+													{
+													<option>@item</option>
+
+													}
+											</select>
+											}
+
+									</th>
+
+									<th>
+											@{
+											<select name="providerName" multiple>
+													@foreach (var item in Model.dataForFilter.providerName)
+													{
+													<option>@item</option>
+													}
+											</select>
+											}
+
+									</th>
+
+									<th>
+
+									</th>
+
+
+									<th>
+											@{
+											<select name="orderItemName" multiple>
+													@foreach (var item in Model.dataForFilter.orderItemName)
+													{
+													<option>@item</option>
+													}
+											</select>
+											}
+
+									</th>
+
+									<th>
+
+									</th>
+
+									<th>
+											@{
+											<select name="unit" multiple>
+													@foreach (var item in Model.dataForFilter.unit)
+													{
+													<option>@item</option>
+													}
+											</select>
+											}
+
+									</th>
+
+								</tr>
+								</form>
+							</thead>
+							<tbody id="edit">
+								@{
+									<form action="DeleteOrderItem/@Model.orderId" method="post">
+										<input type="submit" id="deleteBtn" class="btn btn-primary" value="Удалить строку" onclick="return confirm('Вы уверены, что хотите удалить запись?')" />
+										<button type="button" id="editBtn" class="btn btn-primary">Редактировать</button>
+										@foreach (var item in Model.ordersData)
+										{
+											if (!string.IsNullOrEmpty(item.orderItemName))
+											{
+												<tr id="initData">
+												<td><input type="radio" name="id" value="@item.orderItemId" /></td>
+												<td>@item.providerId</td>
+												<td>@item.providerName</td>
+												<td>@item.orderItemId</td>
+												<td>@item.orderItemName</td>
+												<td>@item.quantity</td>
+												<td>@item.unit</td>
+												</tr>
+											}
+											
+										}
+									</form>
+
+									<form action="AddOrderItem" method="post">
+									<tr>
+										<td><input type="submit" class="btn btn-primary" value="Добавить" /></td>
+										<td></td>
+										<td><input type="hidden" name="providerId" value="@Model.ordersData.FirstOrDefault()?.providerId"/></td>
+										<td></td>
+										<td><input type="text" name="orderItemName" style="width:70px" required/></td>
+										<td><input type="text" name="quantity" style="width:70px" required/></td>
+										<td><input type="text" name="unit" style="width:70px" required/></td>
+									</tr>
+									<input type="hidden" name="date" value="@Model.date" />
+									<input type="hidden" name="number" value="@Model.number" />
+									<input type="hidden" name="orderId" value="@Model.orderId" />
+									</form>
+								}
+
+							</tbody>
+
+
+							<tbody id="formSend"  class="display-none">
+								@{
+									<form action="EditOrderItems" method="post">
+										<input type="submit" id="saveBtn" value="Сохранить" class="btn btn-primary"/>
+										<select name="providerId" id="providerName" class="display-none">
+													@foreach (var prov in Model.providers)
+													{
+													<option value="@prov.Id">@prov.Name</option>
+													}
+												</select>
+										
+										@foreach (var item in Model.ordersData)
+										{
+										<tr id="initData">
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td><input name="orderItemName" type="text" value="@item.orderItemName" required/></td>
+											<td><input name="quantity" type="text" value="@item.quantity" required/></td>
+											<td><input name="unit" type="text" value="@item.unit" required/></td>
+										</tr>
+										}
+										<input id="number" name="number" type="hidden" />
+										<input id="date" name="date" type="hidden" />
+										<input name="orderId" type="hidden" value="@Model.orderId" />
+									</form>
+
+								}
+
+							</tbody>
+						</table>
+					</div>
+
+				}
+			}
+		</div>
+	</div>
+</section>
+
+<script>
+    $('#editBtn').click(function() {
+    $('#formSend').removeClass('display-none');
+	$('#providerName').removeClass('display-none');
+    $('#edit').toggleClass('display-none');
+	$('#editBtn').toggleClass('display-none');
+	$('#filterForm').toggleClass('display-none');
+	$('#appFilter').toggleClass('display-none');
+	$('#clearFilter').toggleClass('display-none');
+	$('#deleteBtn').toggleClass('display-none');
+	$('#title').toggleClass('display-none');
+	$('#titleEdit').removeClass('display-none');
+	
+    });
+
+	$('#saveBtn').click(function() {
+    
+	document.getElementById("number").value = document.getElementById('numberHidden').value;
+	document.getElementById("date").value = document.getElementById('dateHidden').value;
+    });
+</script>   
+
+
+

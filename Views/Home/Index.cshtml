@@ -1,0 +1,121 @@
+﻿@{
+	ViewData["Title"] = "Главная страница";
+
+}
+
+@{
+	string[] tableColumnHeader = new string[] { "Id", "Number", "Date", "ProviderId"};
+}
+
+@model HomePageModel
+
+
+<section>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-md-12 col-sm-12">
+				<div class="section-title" style="text-align: center;">
+					<h2>Заявки</h2>
+				</div>
+			</div>
+
+			@{
+				if (Model != null)
+				{
+					<form asp-controller="Home" asp-action="Index" method="post">
+						<input type="date" value="@Model.date1" aria-required="false"
+					   	aria-invalid="false" name="date1" style="height: 30px;border: none;" />
+
+						<input type="date" value="@Model.date2" aria-required="false"
+					   	aria-invalid="false" name="date2" style="height: 30px;border: none;" />
+
+						<input type="submit" value="Применить фильтр" class="btn btn-primary" />
+						<input type="button" value="Сбросить" class="btn btn-primary" onClick="document.location='/Home'" />
+						<input type="button" value="Добавить заказ" class="btn btn-primary" onClick="document.location='/AddOrder'" />
+						<div class="table">
+							<table class="table table-bordered table-hover table-striped" id="myTableId">
+								<thead>
+									<tr>
+										@{
+											foreach (string columnHead in tableColumnHeader)
+											{
+												<th>@columnHead</th>
+											}
+										}
+									</tr>
+
+									<tr>
+										<th>
+
+										</th>
+										
+										<th>
+											@{
+
+												<select name="number" multiple>
+													@foreach (var item in Model.dataForFilter.number)
+													{
+														<option>@item</option>
+
+													}
+												</select>
+											}
+
+										</th>
+
+										<th>
+											@{
+												<select name="date" multiple>
+													@foreach (var item in Model.dataForFilter.date)
+													{
+														<option>@item</option>
+													}
+												</select>
+											}
+
+										</th>
+
+										<th>
+											@{
+												<select name="providerId" multiple>
+													@foreach (var item in Model.dataForFilter.providerId)
+													{
+														<option>@item</option>
+													}
+												</select>
+											}
+
+										</th>
+
+									</tr>
+
+								</thead>
+								<tbody>
+									@{
+										foreach (var item in Model.orders)
+										{
+											<tr onclick="window.open('/ViewOrder/@item.Id')">
+												<td>@item.Id</td>
+												<td>@item.Number</td>
+												<td>@item.Date.ToShortDateString()</td>
+												<td>@item.ProviderId</td>
+											</tr>
+										}
+
+									}
+
+								</tbody>
+							</table>
+						</div>
+					</form>
+				}
+			}
+		</div>
+	</div>
+</section>
+
+
+
+
+
