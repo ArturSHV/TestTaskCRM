@@ -4,7 +4,7 @@ namespace WebSite.Models
 {
     public interface IPageModel
     {
-        public IPageModel InitialData(DataContext dataContext);
-
+        public IPageModel pageModel { get; set; }
+        void InitialData();
     }
 }

@@ -6,14 +6,20 @@ namespace WebSite.Controllers
     public class AddOrderController : Controller
     {
         public AddOrderPageModel model { get; set; }
+        private DataContext dataContext { get; set; }
+        private AddOrderPageModel modelHelper { get; set; }
 
         public AddOrderController([FromServices] DataContext dataContext)
         {
-            IFactory viewOrderFactory = new AddOrderFactory();
+            this.dataContext = dataContext;
+
+            modelHelper = new AddOrderPageModel(dataContext);
+
+            IFactory viewOrderFactory = new AddOrderFactory(dataContext);
 
             IPageModel pageModel = viewOrderFactory.Create();
 
-            model = pageModel.InitialData(dataContext) as AddOrderPageModel;
+            model = pageModel.pageModel as AddOrderPageModel;
         }
 
         public IActionResult Index()
@@ -22,7 +28,7 @@ namespace WebSite.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index([FromServices] DataContext dataContext, string number, string providerName)
+        public IActionResult Index(string number, string providerName)
         {
             var providerId = dataContext.Provider.FirstOrDefault(x=>x.Name==providerName);
             if (providerId != null)

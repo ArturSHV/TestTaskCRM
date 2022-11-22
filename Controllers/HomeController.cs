@@ -7,15 +7,21 @@ namespace WebSite.Controllers
 {
     public class HomeController : Controller
     {
-        public HomePageModel model { get; set; }
+        private HomePageModel model { get; set; }
+        private DataContext dataContext { get; set; }
+        private HomePageModel modelHelper { get; set; }
 
         public HomeController([FromServices] DataContext dataContext)
 		{
-            IFactory homeFactory = new HomeFactory();
+            this.dataContext = dataContext;
+
+            modelHelper = new HomePageModel(dataContext);
+
+            IFactory homeFactory = new HomeFactory(dataContext);
 
             IPageModel pageModel = homeFactory.Create();
 
-            model = pageModel.InitialData(dataContext) as HomePageModel;
+            model = pageModel.pageModel as HomePageModel;
         }
 
         public IActionResult Index()
@@ -64,7 +70,6 @@ namespace WebSite.Controllers
         {
             if (date != null)
             {
-                var modelHelper = new HomePageModel();
                 foreach (var item in date)
                 {
                     var a = model.orders.Where(x => x.Date.ToShortDateString() == item.ToShortDateString()).ToList();
@@ -106,7 +111,6 @@ namespace WebSite.Controllers
         {
             if (number != null)
             {
-                var modelHelper = new HomePageModel();
                 foreach (var item in number)
                 {
                     var a = model.orders.Where(x => x.Number == item).ToList(); 
@@ -124,7 +128,6 @@ namespace WebSite.Controllers
         {
             if (providerId != null)
             {
-                var modelHelper = new HomePageModel();
                 foreach (var item in providerId)
                 {
                     var a = model.orders.Where(x => x.ProviderId == item).ToList();

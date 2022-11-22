@@ -5,24 +5,37 @@
         public int orderId { get; set; }
         public string number { get; set; }
         public DateTime? date { get; set; }
+
         public List<Provider> providers = new List<Provider>();
+
         public List<Order> orders = new List<Order>();
+
         public List<OrderItem> orderItems = new List<OrderItem>();
         
         public DataForFilter dataForFilter = new DataForFilter();
-        public List<OrdersData> ordersData = new List<OrdersData>();
 
-        public IPageModel InitialData(DataContext dataContext)
+        public List<OrdersData> ordersData = new List<OrdersData>();
+        public IPageModel pageModel { get; set; }
+        private DataContext dataContext { get; set; }
+
+
+        public ViewOrderPageModel(DataContext dataContext)
+        {
+            this.dataContext = dataContext;
+        }
+
+        public void InitialData()
         {
             orders = dataContext.Order.ToList();
             orderItems = dataContext.OrderItem.ToList();
             providers = dataContext.Provider.ToList();
             OrdersDataCreate();
-            return new ViewOrderPageModel() { dataForFilter = dataForFilter, 
-                providers = providers, orderItems = orderItems, orders = orders, ordersData = ordersData };
+
+            pageModel = new ViewOrderPageModel(dataContext) { orders = orders, orderItems = orderItems, 
+                providers = providers, ordersData = ordersData };
         }
 
-        public void OrdersDataCreate()
+        private void OrdersDataCreate()
         {
             ordersData = orders.Join(
                orderItems,

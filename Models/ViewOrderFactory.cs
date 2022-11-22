@@ -2,9 +2,16 @@
 {
     public class ViewOrderFactory : IFactory
     {
+        private DataContext dataContext;
+        public ViewOrderFactory(DataContext dataContext)
+        {
+            this.dataContext = dataContext;
+        }
         public IPageModel Create()
         {
-            return new ViewOrderPageModel();
+            IPageModel viewOrderPageModel = new ViewOrderPageModel(dataContext);
+            viewOrderPageModel.InitialData();
+            return viewOrderPageModel;
         }
     }
 }

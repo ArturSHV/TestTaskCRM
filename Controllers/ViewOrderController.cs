@@ -6,18 +6,24 @@ namespace WebSite.Controllers
     public class ViewOrderController : Controller
     {
         public ViewOrderPageModel model { get; set; }
+        private DataContext dataContext { get; set; }
+        private ViewOrderPageModel modelHelper { get; set; }
 
         public ViewOrderController([FromServices] DataContext dataContext)
         {
-            IFactory viewOrderFactory = new ViewOrderFactory();
+            this.dataContext = dataContext;
+
+            modelHelper = new ViewOrderPageModel(dataContext);
+
+            IFactory viewOrderFactory = new ViewOrderFactory(dataContext);
 
             IPageModel pageModel = viewOrderFactory.Create();
 
-            model = pageModel.InitialData(dataContext) as ViewOrderPageModel;
+            model = pageModel as ViewOrderPageModel;
         }
 
         [Route("{controller}/{id}")]
-        public IActionResult Index(int id, [FromServices] DataContext dataContext)
+        public IActionResult Index(int id)
         {
             try
             {
@@ -38,7 +44,7 @@ namespace WebSite.Controllers
         /// <returns></returns>
         [Route("{controller}/{id}")]
         [HttpPost]
-        public IActionResult Index(OrdersDataGet ordersDataGet, int id, [FromServices] DataContext dataContext)
+        public IActionResult Index(OrdersDataGet ordersDataGet, int id)
         {
             try
             {
@@ -57,7 +63,7 @@ namespace WebSite.Controllers
 
         [HttpPost]
         [Route("{controller}/{action}")]
-        public IActionResult AddOrderItem([FromServices] DataContext dataContext, OrdersData ordersData)
+        public IActionResult AddOrderItem(OrdersData ordersData)
         {
             var orderItem = new OrderItem()
             {
@@ -89,7 +95,7 @@ namespace WebSite.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{controller}/{action}/{id}")]
-        public IActionResult DeleteOrder([FromServices] DataContext dataContext, int id)
+        public IActionResult DeleteOrder(int id)
         {
             var order = dataContext.Order.FirstOrDefault(x=>x.Id==id);
             if (order != null)
@@ -123,7 +129,7 @@ namespace WebSite.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{controller}/{action}/{orderId}")]
-        public IActionResult DeleteOrderItem([FromServices] DataContext dataContext, int orderId, int id)
+        public IActionResult DeleteOrderItem(int orderId, int id)
         {
             if (id == 0) return Redirect($"/Error/Выберите строку");
 
@@ -153,11 +159,11 @@ namespace WebSite.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{controller}/{action}")]
-        public IActionResult EditOrderItems([FromServices] DataContext dataContext, OrdersDataGet ordersDataGet)
+        public IActionResult EditOrderItems(OrdersDataGet ordersDataGet)
         {
             try
             {
-                var message = SendEditData(dataContext, ordersDataGet);
+                var message = SendEditData(ordersDataGet);
                 if (message == "Успешно")
                 {
                     dataContext.SaveChanges();
@@ -178,7 +184,7 @@ namespace WebSite.Controllers
         /// <param name="dataContext"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        private bool EditOrderTable(DataContext dataContext, Order order)
+        private bool EditOrderTable(Order order)
         {
             var oldOrder = dataContext.Order.FirstOrDefault(x => x.Id == order.Id);
             if (oldOrder != null)
@@ -197,7 +203,7 @@ namespace WebSite.Controllers
         /// <param name="dataContext"></param>
         /// <param name="orderItem"></param>
         /// <returns></returns>
-        private void EditOrderItemTable(DataContext dataContext, OrderItem orderItem)
+        private void EditOrderItemTable(OrderItem orderItem)
         {
             var oldOrderItem = dataContext.OrderItem.FirstOrDefault(x => x.Id == orderItem.Id);
             if (oldOrderItem != null)
@@ -218,7 +224,7 @@ namespace WebSite.Controllers
         /// <param name="dataContext"></param>
         /// <param name="ordersDataGet"></param>
         /// <returns></returns>
-        private string SendEditData(DataContext dataContext, OrdersDataGet ordersDataGet)
+        private string SendEditData(OrdersDataGet ordersDataGet)
         {
             int a = 0;
             for (int i = 0; i < ordersDataGet.orderItemName.Count; i++)
@@ -233,7 +239,7 @@ namespace WebSite.Controllers
                     Number = ordersDataGet.number?.FirstOrDefault(),
                     ProviderId = newProviderId
                 };
-                var isOrderTrue = EditOrderTable(dataContext, order);
+                var isOrderTrue = EditOrderTable(order);
 
                 var orderItemReq = dataContext.OrderItem.FirstOrDefault(x => x.Name == ordersDataGet.orderItemName[i]);
                 OrderItem orderItem = new OrderItem()
@@ -243,7 +249,7 @@ namespace WebSite.Controllers
                     Quantity = ordersDataGet.quantity[i],
                     Unit = ordersDataGet.unit[i]
                 };
-                EditOrderItemTable(dataContext, orderItem);
+                EditOrderItemTable(orderItem);
 
                 var check = dataContext.Order.Where(x=>(x.Number== ordersDataGet.number.FirstOrDefault()) 
                 && (x.ProviderId==newProviderId) && (x.Id != ordersDataGet.orderId)).ToList();
@@ -317,7 +323,6 @@ namespace WebSite.Controllers
         {
             if (number != null)
             {
-                var modelHelper = new ViewOrderPageModel();
                 foreach (var item in number)
                 {
                     var a = model.ordersData.Where(x => x.number == item).ToList();
@@ -336,7 +341,6 @@ namespace WebSite.Controllers
             
             if (providerId != null)
             {
-                var modelHelper = new ViewOrderPageModel();
                 foreach (var item in providerId)
                 {
                     var a = model.ordersData.Where(x => x.providerId == item).ToList();
@@ -354,7 +358,6 @@ namespace WebSite.Controllers
         {
             if (orderitemName != null)
             {
-                var modelHelper = new ViewOrderPageModel();
                 foreach (var item in orderitemName)
                 {
                     var a = model.ordersData.Where(x => x.orderItemName == item).ToList();
@@ -372,7 +375,6 @@ namespace WebSite.Controllers
         {
             if (orderitemUnit != null)
             {
-                var modelHelper = new ViewOrderPageModel();
                 foreach (var item in orderitemUnit)
                 {
                     var a = model.ordersData.Where(x => x.unit == item).ToList();

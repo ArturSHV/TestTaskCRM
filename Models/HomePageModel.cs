@@ -6,19 +6,28 @@ namespace WebSite.Models
     public class HomePageModel : IPageModel
     {
         public List<Order> orders = new List<Order>();
+
         public DataForFilter dataForFilter = new DataForFilter();
         public string date1 { get; set; }
         public string date2 { get; set; }
+        public IPageModel pageModel { get; set; }
+        private DataContext dataContext { get; set; }
 
-        public IPageModel InitialData(DataContext dataContext)
+
+        public HomePageModel(DataContext dataContext)
         {
-
-            OrdersDataCreate(dataContext);
-            DataForFilterCreate(dataContext);
-            return new HomePageModel { orders = orders, dataForFilter = dataForFilter };
+            this.dataContext = dataContext;
+            
         }
 
-        private void DataForFilterCreate(DataContext dataContext)
+        public void InitialData()
+        {
+            OrdersDataCreate();
+            DataForFilterCreate();
+            pageModel = new HomePageModel(dataContext) { dataForFilter = dataForFilter, orders = orders };
+        }
+
+        private void DataForFilterCreate()
         {
             dataForFilter = new DataForFilter()
             {
@@ -29,7 +38,7 @@ namespace WebSite.Models
 
         }
 
-        private void OrdersDataCreate(DataContext dataContext)
+        private void OrdersDataCreate()
         {
             orders = dataContext.Order.ToList();
         }
